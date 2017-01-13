@@ -36,6 +36,9 @@
 /* Current pad state */
 static SceCtrlData pad0 = { .lx = 0, .ly = 0, .rx = 0, .ry = 0, .buttons = 0 };
 static SceCtrlData pad1 = { .lx = 0, .ly = 0, .rx = 0, .ry = 0, .buttons = 0 };
+static SceCtrlData pad2 = { .lx = 0, .ly = 0, .rx = 0, .ry = 0, .buttons = 0 };
+static SceCtrlData pad3 = { .lx = 0, .ly = 0, .rx = 0, .ry = 0, .buttons = 0 };
+static int port_map[4]= { 0, 2, 3, 4 }; //index: SDL joy number, entry: Vita port number
 static const unsigned int button_map[] = {
     SCE_CTRL_TRIANGLE, SCE_CTRL_CIRCLE, SCE_CTRL_CROSS, SCE_CTRL_SQUARE,
     SCE_CTRL_LTRIGGER, SCE_CTRL_RTRIGGER,
@@ -82,8 +85,9 @@ static int calc_bezier_y(float t)
  */
 int SDL_SYS_JoystickInit(void)
 {
-    int i;
-    /* Setup input */
+	int i;
+
+	/* Setup input */
 	sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
 	
     /* Create an accurate map from analog inputs (0 to 255)
@@ -94,10 +98,28 @@ int SDL_SYS_JoystickInit(void)
         analog_map[i+128] = calc_bezier_y(t);
         analog_map[127-i] = -1 * analog_map[i+128];
     }
-
-	 SDL_numjoysticks = 2; //include possibility of paired DS controller
-
-    return 2;
+	
+	SceCtrlPortInfo myPortInfo;
+		
+	// Assume we have at least one controller, even when nothing is paired
+	// This way the user can jump in, pair a controller
+	// and control things immediately even if it is paired
+	// after the app has already started.
+	
+	SDL_numjoysticks = 1; 
+	
+	//How many additional paired controllers are there?
+	sceCtrlGetControllerPortInfo(&myPortInfo);
+	//On Vita TV, port 0 and 1 are the same controller
+	//and that is the first one, so start at port 2
+	for (i=2; i<=4; i++)
+	{
+		if (myPortInfo.port[i]!=SCE_CTRL_TYPE_UNPAIRED)
+		{
+			SDL_numjoysticks++;
+		}
+	}
+   return SDL_numjoysticks;
 }
 
 /* Function to get the device-dependent name of a joystick */
@@ -107,8 +129,14 @@ const char *SDL_SYS_JoystickName(int index)
         return "psp2 controller";
 
 	if (index == 1)
-        return "second paired psp2 controller";
+        return "psp2 controller";
+	
+	if (index == 2)
+        return "psp2 controller";
 
+	if (index == 3)
+        return "psp2 controller";
+	
     SDL_SetError("No joystick available with that index");
     return(NULL);
 }
@@ -138,11 +166,11 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
     unsigned int buttons;
     unsigned int changed;
     unsigned char lx, ly, rx, ry;
-    static unsigned int old_buttons[] = { 0, 0 };
-    static unsigned char old_lx[] = { 0, 0 };
-    static unsigned char old_ly[] = { 0, 0 };
-    static unsigned char old_rx[] = { 0, 0 };
-    static unsigned char old_ry[] = { 0, 0 };
+    static unsigned int old_buttons[] = { 0, 0, 0, 0 };
+    static unsigned char old_lx[] = { 0, 0, 0, 0 };
+    static unsigned char old_ly[] = { 0, 0, 0, 0 };
+    static unsigned char old_rx[] = { 0, 0, 0, 0 };
+    static unsigned char old_ry[] = { 0, 0, 0, 0 };
 	 SceCtrlData *pad = NULL;    
 	 
 	 int index = joystick->index;
@@ -151,13 +179,14 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 	 	pad = &pad0;
 	 else if (index == 1)
 	 	pad = &pad1;
+	 else if (index == 2)
+	 	pad = &pad2;
+	 else if (index == 3)
+	 	pad = &pad3;	 
 	 else
 	 	return;
 	 
-	 if (index == 0)
-		sceCtrlPeekBufferPositive(0, pad, 1); // Physical Vita controller or first paired Dualshock on Vita TV
-	 else if (index == 1)	
-    	sceCtrlPeekBufferPositive(2, pad, 1); // Second paired Dualshock on Vita TV
+	 sceCtrlPeekBufferPositive(port_map[index], pad, 1); 
 
     buttons = pad->buttons;
     lx = pad->lx;

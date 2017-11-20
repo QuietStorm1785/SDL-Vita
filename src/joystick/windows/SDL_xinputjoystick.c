@@ -119,7 +119,7 @@ GuessXInputDevice(Uint8 userid, Uint16 *pVID, Uint16 *pPID, Uint16 *pVersion)
 #ifndef __WINRT__   /* TODO: remove this ifndef __WINRT__ block, but only after integrating with UWP/WinRT's HID API */
 
     PRAWINPUTDEVICELIST devices = NULL;
-    UINT i, j, found_count = 0, device_count = 0;
+    UINT i, j, device_count = 0;
 
     if ((GetRawInputDeviceList(NULL, &device_count, sizeof(RAWINPUTDEVICELIST)) == -1) || (!device_count)) {
         return;  /* oh well. */
@@ -251,6 +251,12 @@ AddXInputDevice(Uint8 userid, BYTE SubType, JoyStick_DeviceData **pContext)
     }
     pNewJoystick->SubType = SubType;
     pNewJoystick->XInputUserId = userid;
+
+    if (SDL_ShouldIgnoreGameController(pNewJoystick->joystickname, pNewJoystick->guid)) {
+        SDL_free(pNewJoystick);
+        return;
+    }
+
     SDL_SYS_AddJoystickDevice(pNewJoystick);
 }
 

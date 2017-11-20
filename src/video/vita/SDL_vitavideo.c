@@ -117,8 +117,8 @@ VITA_Create()
     device->VideoQuit = VITA_VideoQuit;
     device->GetDisplayModes = VITA_GetDisplayModes;
     device->SetDisplayMode = VITA_SetDisplayMode;
-    device->CreateWindow = VITA_CreateWindow;
-    device->CreateWindowFrom = VITA_CreateWindowFrom;
+    device->CreateSDLWindow = VITA_CreateWindow;
+    device->CreateSDLWindowFrom = VITA_CreateWindowFrom;
     device->SetWindowTitle = VITA_SetWindowTitle;
     device->SetWindowIcon = VITA_SetWindowIcon;
     device->SetWindowPosition = VITA_SetWindowPosition;

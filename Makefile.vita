@@ -52,11 +52,11 @@ OBJS= src/SDL.o \
       src/stdlib/SDL_stdlib.o \
       src/stdlib/SDL_string.o \
       src/thread/SDL_thread.o \
+      src/thread/generic/SDL_systls.o \
       src/thread/vita/SDL_syssem.o \
       src/thread/vita/SDL_systhread.o \
       src/thread/vita/SDL_sysmutex.o \
       src/thread/vita/SDL_syscond.o \
-      src/thread/generic/SDL_systls.o \
       src/timer/SDL_timer.o \
       src/timer/vita/SDL_systimer.o \
       src/video/SDL_RLEaccel.o \
@@ -76,6 +76,8 @@ OBJS= src/SDL.o \
       src/video/SDL_stretch.o \
       src/video/SDL_surface.o \
       src/video/SDL_video.o \
+      src/video/SDL_yuv.o \
+      src/video/yuv2rgb/yuv_rgb.o \
       src/video/vita/SDL_vitavideo.o \
       src/video/vita/SDL_vitagl.o \
       src/video/vita/SDL_vitamouse.o \
